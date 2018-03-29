@@ -1,153 +1,152 @@
-import {Socket} from "phoenix"
+import {Socket} from "phoenix";
 
-let socket = new Socket("/socket", {params: {token: window.userToken}})
+let socket = new Socket("/socket", {params: {token: window.userToken}});
 
-
-socket.connect()
+socket.connect();
 
 // Now that you are connected, you can join channels with a topic:
-let channel = socket.channel("marty", {})
+let channel = socket.channel("marty", {});
 channel.join()
-  .receive("ok", resp => { console.log("Joined successfully", resp) })
-  .receive("error", resp => { console.log("Unable to join", resp) })
+  .receive("ok", resp => { console.log("Joined successfully", resp); })
+  .receive("error", resp => { console.log("Unable to join", resp); });
 
-let speedSelect = document.getElementById("speed")
-let stepsSelect = document.getElementById("steps")
+// Get elements
 
-let kickSpeedSelect = document.getElementById("kick-speed")
-let kickTwistSelect = document.getElementById("kick-twist")
+let motion = document.getElementById('motion-select');
+let stepsSelect = document.getElementById('steps');
+let kickTwistSelect = document.getElementById('kick-twist');
+let speedRadios = document.getElementsByName('speed');
+let connectionElement = document.getElementById('connection');
+let batteryElement = document.getElementById('battery');
 
+// Add event listeners
 
-document.getElementById("hello").addEventListener("click", e => {
-  channel.push("hello", {})
-})
+motion.addEventListener('change', e => {
+  setupInputState(motion.value);
+});
 
-document.getElementById("celebrate").addEventListener("click", e => {
-  channel.push("celebrate", {speed: speedSelect.value})
-})
+document.getElementById('go').addEventListener('click', e => {
+  performMotion(motion.value);
+});
+
+document.getElementById('hello').addEventListener('click', e => {
+  channel.push('hello', {});
+});
+
+document.getElementById('move-stop').addEventListener('click', e => {
+  channel.push('stop', {});
+});
+
+document.getElementById('lifelike').addEventListener('click', e => {
+  if (document.getElementById('lifelike').checked) {
+    channel.push('lifelike', {enable: true});
+  } else {
+    channel.push('lifelike', {enable: false});
+  }
+});
+
+// input state functions
+
+const setupInputState = motion => {
+  if(/circle|celebrate/.test(motion)){
+    disableInputs({steps: true, twist: true, speed: false});
+  } else if(motion.includes('kick')){
+    disableInputs({steps: true, twist: false, speed: false});
+  } else if(motion.includes('tap')){
+    disableInputs({steps: true, twist: true, speed: true});
+  } else {
+    disableInputs({steps: false, twist: true, speed: false});
+  }
+};
+
+const disableInputs = ({steps, twist, speed}) => {
+  stepsSelect.disabled = steps;
+  kickTwistSelect.disabled = twist;
+  for (var i=0, iLen=speedRadios.length; i<iLen; i++) {
+    speedRadios[i].disabled = speed;
+  }
+};
+
+// Motion functions
+
+const performMotion = motion => {
+  let speed = document.querySelector('input[name="speed"]:checked').value;
+
+  switch(motion) {
+    case 'celebrate':
+      channel.push('celebrate', {speed: speed});
+      break;
+    case 'tap-left':
+      tapFoot('left');
+      break;
+    case 'tap-right':
+      tapFoot('right');
+      break;
+    case 'kick-left':
+      kick('left', speed);
+      break;
+    case 'kick-right':
+      kick('right', speed);
+      break;
+    case 'circle-left':
+      circleDance('left', speed);
+      break;
+    case 'circle-right':
+      circleDance('right', speed);
+      break;
+    default:
+      walk(motion, speed);
+      break;
+  }
+};
 
 let kick  = foot => {
-  let kickSpeed = kickSpeedSelect.value
-  let kickTwist = kickTwistSelect.value
-  channel.push("kick", {foot: foot, speed: kickSpeed, twist: kickTwist})
-}
+  let twist = kickTwistSelect.value;
+  channel.push('kick', {foot: foot, speed: speed, twist: twist});
+};
 
-let circleDance = side => {
-  let speed = speedSelect.value
-  channel.push("circle_dance", {side: side, speed: speed})
-}
+let circleDance = (side, speed) => {
+  channel.push('circle_dance', {side: side, speed: speed});
+};
 
-document.getElementById("kick-left").addEventListener("click", e => {
-  kick("left")
-})
+let tapFoot = foot => {
+  channel.push('tap_foot', {foot: foot});
+};
 
-document.getElementById("kick-right").addEventListener("click", e => {
-  kick("right")
-})
+let walk = (motion, speed) => {
+  channel.push('walk', {
+    direction: motion,
+    speed: speed,
+    steps: stepsSelect.value
+  });
+};
 
-document.getElementById("tap-left").addEventListener("click", e => {
-  channel.push("tap_foot", {foot: "left"})
-})
+// Connection states
 
-document.getElementById("tap-right").addEventListener("click", e => {
-  channel.push("tap_foot", {foot: "right"})
-})
-
-document.getElementById("circle-left").addEventListener("click", e => {
-  circleDance("left")
-})
-
-document.getElementById("circle-right").addEventListener("click", e => {
-  circleDance("right")
-})
-
-document.getElementById("lifelike-on").addEventListener("click", e => {
-  channel.push("lifelike", {enable: true})
-})
-
-document.getElementById("lifelike-off").addEventListener("click", e => {
-  channel.push("lifelike", {enable: false})
-})
-
-
-
-const directions = ["forward-left", "forward", "forward-right",
-                    "side-left", "side-right",
-                    "back-left", "back", "back-right"]
-
-for (let d of directions) {
-  let button = document.getElementById(`move-${d}`)
-  button.addEventListener("click", e => {
-    channel.push("walk", {
-      direction: d,
-      speed: speedSelect.value,
-      steps: stepsSelect.value
-    })
-  })
-}
-
-document.getElementById("move-stop").addEventListener("click", e => {
-  channel.push("stop", {})
-})
-
-
-let connectedElement = document.getElementById("connected")
-let batteryElement = document.getElementById("battery")
-let chatElement = document.getElementById("chat")
-let leftBumpElement = document.getElementById("left-bump")
-let rightBumpElement = document.getElementById("right-bump")
-
-let bumpText = (side, bumped) => {
-  if (bumped) {
-    return `${side} bump`
-  } else {
-    return `${side} nope`
-  }
-}
-
-let bumpClass = (el, bumped) => {
-  if (bumped) {
-    el.classList.add("bumped")
-  } else {
-    el.classList.remove("bumped")
-  }
-}
-
-let bumpLeft = bumped => {
-  leftBumpElement.innerHTML = bumpText("Left", bumped)
-  bumpClass(leftBumpElement, bumped)
-}
-
-let bumpRight = bumped => {
-  rightBumpElement.innerHTML = bumpText("Right", bumped)
-  bumpClass(rightBumpElement, bumped)
-}
-
-let connectedState = martyState => {
-  connectedElement.innerHTML = "Connected"
-  if(martyState.battery != null) {
-    batteryElement.innerHTML = martyState.battery.toFixed(3)
-  }
-}
-
-let disconnectedState = () => {
-  connectedElement.innerHTML = "Disconnected"
-  batteryElement.innerHTML = "?"
-  chatElement.innerHTML = ""
-  bumpLeft(false)
-  bumpRight(false)
-}
-
-channel.on("marty_state", martyState => {
-  if(martyState["connected?"]) {
-    connectedState(martyState)
+channel.on('marty_state', martyState => {
+  if(martyState['connected?']) {
+    connectedState(martyState);
   }  else {
-    disconnectedState()
+    disconnectedState();
   }
-  bumpLeft(martyState.touch_sensors.left)
-  bumpRight(martyState.touch_sensors.right)
-})
+});
 
-channel.on("marty_chat", chat => {
-  chatElement.innerHTML = chat.msg
-})
+const connectedState = martyState => {
+  connectionElement.src = '/images/connected.svg';
+  batteryElement.src = '/images/full-battery.svg';
+
+  if(martyState.battery != null) {
+    if(martyState.battery.toFixed(3) <= 7.7) {
+      batteryElement.src = '/images/mid-battery.svg';
+    } else if(martyState.battery.toFixed(3) <= 6.9) {
+      batteryElement.src = '/images/low-battery.svg';
+    }
+  }
+};
+
+const disconnectedState = () => {
+  connectionElement.src = '/images/disconnected.svg';
+  batteryElement.src = '/images/battery-unavailable.svg';
+  channel.push('lifelike', { enable: false });
+  document.getElementById('lifelike').checked = false;
+};
