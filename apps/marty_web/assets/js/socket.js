@@ -14,7 +14,6 @@ channel.join()
 
 let motion = document.getElementById('motion-select');
 let stepsSelect = document.getElementById('steps');
-let kickTwistSelect = document.getElementById('kick-twist');
 let speedRadios = document.getElementsByName('speed');
 let connectionElement = document.getElementById('connection');
 let batteryElement = document.getElementById('battery');
@@ -49,19 +48,18 @@ document.getElementById('lifelike').addEventListener('click', e => {
 
 const setupInputState = motion => {
   if(/circle|celebrate/.test(motion)){
-    disableInputs({steps: true, twist: true, speed: false});
+    disableInputs({steps: true, speed: false});
   } else if(motion.includes('kick')){
-    disableInputs({steps: true, twist: false, speed: false});
+    disableInputs({steps: true, speed: false});
   } else if(motion.includes('tap')){
-    disableInputs({steps: true, twist: true, speed: true});
+    disableInputs({steps: true, speed: true});
   } else {
-    disableInputs({steps: false, twist: true, speed: false});
+    disableInputs({steps: false, speed: false});
   }
 };
 
-const disableInputs = ({steps, twist, speed}) => {
+const disableInputs = ({steps, speed}) => {
   stepsSelect.disabled = steps;
-  kickTwistSelect.disabled = twist;
   for (var i=0, iLen=speedRadios.length; i<iLen; i++) {
     speedRadios[i].disabled = speed;
   }
@@ -100,9 +98,8 @@ const performMotion = motion => {
   }
 };
 
-let kick  = foot => {
-  let twist = kickTwistSelect.value;
-  channel.push('kick', {foot: foot, speed: speed, twist: twist});
+let kick  = (foot, speed) => {
+  channel.push('kick', {foot: foot, speed: speed, twist: 1});
 };
 
 let circleDance = (side, speed) => {

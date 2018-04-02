@@ -77,18 +77,6 @@ body {
   background-color: #ced4da;
 }
 
-.input-panel__steps, .input-panel__twist {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: row;
-  flex-direction: row;
-  -webkit-flex: 1;
-}
-
-.input-panel__steps select, .input-panel__twist select {
-  margin-left: 15px;
-}
-
 .input-panel__label {
   font-size: 1.2em;
   display: inline-block;

@@ -36,31 +36,14 @@
         <label class="input-panel__radio-label"><input type="radio" name="speed" value="fast">Fast</label>
       </div>
     </div>
-    <div class="input-panel">
-      <div class="input-panel__steps">
-        <label class="input-panel__label">Steps</label>
-        <div class="input-panel__input">
-          <select id="steps">
-            <%= for {steps, selected} <- steps_select() do %>
-              <option value="<%= steps %>" <%= selected %>><%= steps %></option>
-            <% end %>
-          </select>
-        </div>
-      </div>
-      <div class="input-panel__twist">
-        <label class="input-panel__label">Twist</label>
-        <div class="input-panel__input">
-          <select id="kick-twist" disabled>
-            <%= for kick_twist <- -10..10 do %>
-              <% selected = if kick_twist == 0 do
-              "selected"
-              else
-              ""
-              end %>
-              <option value="<%= kick_twist * 10 %>" <%= selected %>><%= kick_twist * 10 %>°</option>
-            <% end %>
-          </select>
-        </div>
+    <div class="input-panel input-panel__steps">
+      <label class="input-panel__label">Steps</label>
+      <div class="input-panel__input">
+        <select id="steps">
+          <%= for {steps, selected} <- steps_select() do %>
+            <option value="<%= steps %>" <%= selected %>><%= steps %></option>
+          <% end %>
+        </select>
       </div>
     </div>
   </div>
