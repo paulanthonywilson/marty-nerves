@@ -6,15 +6,15 @@
       <%= img_tag("/images/stick_1.jpg", id: "cam", class: "top-panel__placeholder-image") %>
     </div>
     <div class= "top-panel__side-bar">
-      <p><img id="connection" src="/images/disconnected.svg" class="top-panel__icon"></p>
-      <p><img id="battery" src="/images/battery-unavailable.svg" class="top-panel__icon")></p>
-      <p class="top-panel__fidget-label">
-        Fidget
+      <div><img id="connection" src="/images/disconnected.svg" class="top-panel__icon"></div>
+      <div><img id="battery" src="/images/battery-unavailable.svg" class="top-panel__icon")></div>
+      <div class="top-panel__fidget">
+        <p class="top-panel__fidget-label">Fidget</p>
         <label class="switch">
           <input id="lifelike" type="checkbox">
           <span class="slider round"></span>
         </label>
-      </p>
+      </div>
     </div>
   </div>
   <div class="input-panel__wrapper">
@@ -49,7 +49,7 @@
   </div>
   <button id="go" class="button__go">Go!</button>
   <div class="button-panel__stop-clear">
-    <button id="move-stop" class="button__stop">Stop</button>
     <button id="hello" class="button__clear">Clear</button>
+    <button id="move-stop" class="button__stop">Stop</button>
   </div>
 </div>
